@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <main class="hero-section">
+    <div class="container">
+
+      <div class="section-tabs">
+        <div class="events">
+          {% for event in events %}
+            <article>
+              <a class="title" href="{{ event['url'] }}" target="_blank">{{ event['title'] }}</a>
+			  <a class="venuename" target="_blank">{{ event['venuename'] }}</a>
+			  <a class="starttime" target="_blank">{{ event['start_time'] }}</a>
+			   <a class="stoptime" target="_blank">{{ event['stop_time'] }}</a>
+          <a class="venuecity" target="_blank">{{ event['venuecity'] }}</a>
+              </article>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="section-map">
+        <div class="nav">
+          <form method="POST" action="/events">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+              {% if form.address.errors %}
+                {% for error in form.address.errors %}
+                  <p class="error-message">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+
+              {{ form.address(placeholder="Explore events") }}
+            </div>
+
+            {{ form.submit(class="btn-primary") }}
+          </form>
+        </div>
+
+        <div id="map"></div>
+      </div>
+
+      <div class="clearfix"></div>
+    </div>
+  </main>
+
+  <script>
+    var planes = [
+      {% for event in events %}
+        ["<h3><a href='{{ event['url'] }}' target='_blank'>{{ event['title'] }}</a></h3> ", {{ event['latitude'] }}, {{ event['longitude'] }} ],
+      {% endfor %}
+    ];
+
+    var map = L.map('map').setView([{{ my_coordinates[0] }}, {{ my_coordinates[1] }}], 15);
+    mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+    L.tileLayer(
+      'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; ' + mapLink + ' Contributors',
+        maxZoom: 18,
+      }
+    ).addTo(map);
+
+    for (var i = 0; i < planes.length; i++) {
+      marker = new L.marker([planes[i][1],planes[i][2]])
+        .bindPopup(planes[i][0])
+        .addTo(map);
+    }
+  </script>
+
+{% endblock %}
